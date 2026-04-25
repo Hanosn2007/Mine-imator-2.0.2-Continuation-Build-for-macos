@@ -27,14 +27,14 @@ jobs:
           dotnet-version: 6.0.x
 
       - name: Install tools
-        run: brew install cmake libomp
+        run: brew install cmake libomp libpng
 
       - name: Restore Qt cache
         id: qt-cache
         uses: actions/cache@v4
         with:
           path: ${{ env.QT_PREFIX }}
-          key: macos-15-intel-qt-${{ env.QT_VERSION }}-static-x86_64-v1
+          key: macos-15-intel-qt-${{ env.QT_VERSION }}-static-x86_64-v2
 
       - name: Prepare dependency sources
         shell: bash
@@ -65,6 +65,7 @@ jobs:
           tar -xJf "$RUNNER_TEMP/qt.tar.xz" -C "$DEV_DIR/Qt/$QT_VERSION"
 
           cd "$DEV_DIR/Qt/$QT_VERSION/qt-everywhere-src-$QT_VERSION"
+          LIBPNG_PREFIX="$(brew --prefix libpng)"
           ./configure \
             -platform macx-clang \
             -prefix "$QT_PREFIX" \
@@ -73,6 +74,9 @@ jobs:
             -release \
             -static \
             -qt-libjpeg \
+            -system-libpng \
+            -I "$LIBPNG_PREFIX/include" \
+            -L "$LIBPNG_PREFIX/lib" \
             -opengl desktop \
             -no-openssl \
             -securetransport \
