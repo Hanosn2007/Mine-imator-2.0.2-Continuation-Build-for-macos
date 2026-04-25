@@ -1,0 +1,149 @@
+name: macOS Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+env:
+  DEV_DIR: ${{ github.workspace }}/.dev
+  QT_VERSION: 5.15.9
+  QT_PREFIX: ${{ github.workspace }}/.dev/Qt/5.15.9/build
+
+jobs:
+  build:
+    name: Build macOS x86_64
+    runs-on: macos-13
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install tools
+        run: brew install cmake libomp
+
+      - name: Restore Qt cache
+        id: qt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.QT_PREFIX }}
+          key: macos-13-qt-${{ env.QT_VERSION }}-static-x86_64-v1
+
+      - name: Prepare dependency sources
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p "$DEV_DIR"/{Libzip,FreeType,FFmpeg,OpenAL}
+
+          curl -L https://libzip.org/download/libzip-1.9.2.tar.gz -o "$RUNNER_TEMP/libzip.tar.gz"
+          tar -xzf "$RUNNER_TEMP/libzip.tar.gz" -C "$DEV_DIR/Libzip"
+
+          curl -L https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.gz -o "$RUNNER_TEMP/freetype.tar.gz"
+          tar -xzf "$RUNNER_TEMP/freetype.tar.gz" -C "$DEV_DIR/FreeType"
+
+          curl -L http://www.ffmpeg.org/releases/ffmpeg-5.0.tar.xz -o "$RUNNER_TEMP/ffmpeg.tar.xz"
+          tar -xJf "$RUNNER_TEMP/ffmpeg.tar.xz" -C "$DEV_DIR/FFmpeg"
+          rm -f "$DEV_DIR/FFmpeg/ffmpeg-5.0/VERSION"
+
+          curl -L https://openal-soft.org/openal-releases/openal-soft-1.22.0.tar.bz2 -o "$RUNNER_TEMP/openal.tar.bz2"
+          tar -xjf "$RUNNER_TEMP/openal.tar.bz2" -C "$DEV_DIR/OpenAL"
+
+      - name: Build static Qt
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p "$DEV_DIR/Qt/$QT_VERSION"
+          curl -L "https://download.qt.io/archive/qt/5.15/$QT_VERSION/single/qt-everywhere-opensource-src-$QT_VERSION.tar.xz" -o "$RUNNER_TEMP/qt.tar.xz"
+          tar -xJf "$RUNNER_TEMP/qt.tar.xz" -C "$DEV_DIR/Qt/$QT_VERSION"
+
+          cd "$DEV_DIR/Qt/$QT_VERSION/qt-everywhere-src-$QT_VERSION"
+          ./configure \
+            -platform macx-clang \
+            -prefix "$QT_PREFIX" \
+            -opensource \
+            -confirm-license \
+            -release \
+            -static \
+            -qt-libjpeg \
+            -opengl desktop \
+            -no-openssl \
+            -securetransport \
+            -no-icu \
+            -nomake tests \
+            -nomake examples \
+            -nomake tools \
+            -skip qt3d \
+            -skip qtmultimedia \
+            -skip activeqt \
+            -skip qtandroidextras \
+            -skip qtconnectivity \
+            -skip datavis3d \
+            -skip qtdoc \
+            -skip gamepad \
+            -skip qtgraphicaleffects \
+            -skip qtcharts \
+            -skip qtlocation \
+            -skip qtlottie \
+            -skip qtnetworkauth \
+            -skip qtpurchasing \
+            -skip qtquick3d \
+            -skip qtquickcontrols \
+            -skip qtquickcontrols2 \
+            -skip qtquicktimeline \
+            -skip qtremoteobjects \
+            -skip qtscxml \
+            -skip qtsensors \
+            -skip qtserialbus \
+            -skip qtserialport \
+            -skip qtspeech \
+            -skip qtvirtualkeyboard \
+            -skip qtwayland \
+            -skip qtwebengine \
+            -skip qtwebglplugin \
+            -skip qtwebchannel \
+            -skip qtwebsockets \
+            -skip qtwebview \
+            -skip qtxmlpatterns
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Generate C++ sources
+        run: |
+          dotnet run --project CppGen/CppGen/CppGen.csproj -- \
+            GmProject \
+            CppProject/Generated \
+            CppProject/Asset/Sprites \
+            CppProject/Asset/Shaders \
+            CppGen/gml.json < /dev/null
+
+      - name: Configure Mine-imator
+        run: |
+          cmake -S CppProject -B build-mac-x64 -G Xcode \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DDEV_DIR="$DEV_DIR" \
+            -DQt_DIR="$QT_PREFIX"
+
+      - name: Build Mine-imator
+        run: cmake --build build-mac-x64 --config Release --target Mine-imator --parallel 3
+
+      - name: Prepare artifact
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p artifact/Mine-imator-macos-x64
+          cp build-mac-x64/Release/Mine-imator artifact/Mine-imator-macos-x64/
+          cp -R GmProject/datafiles/* artifact/Mine-imator-macos-x64/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mine-imator-macos-x64
+          path: artifact/Mine-imator-macos-x64

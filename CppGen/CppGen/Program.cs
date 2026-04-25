@@ -478,7 +478,7 @@ namespace CppGen
 			}
 			else
 				Console.WriteLine("Success!");
-			if (!Console.IsInputRedirected)
+			if (args.Length == 0 && !Console.IsInputRedirected)
 				Console.ReadKey();
 		}
 
