@@ -14,7 +14,7 @@ env:
 jobs:
   build:
     name: Build macOS x86_64
-    runs-on: macos-13
+    runs-on: macos-15-intel
     timeout-minutes: 360
 
     steps:
@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.QT_PREFIX }}
-          key: macos-13-qt-${{ env.QT_VERSION }}-static-x86_64-v1
+          key: macos-15-intel-qt-${{ env.QT_VERSION }}-static-x86_64-v1
 
       - name: Prepare dependency sources
         shell: bash
