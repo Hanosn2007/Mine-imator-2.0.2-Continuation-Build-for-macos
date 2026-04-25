@@ -9,6 +9,15 @@ set(MAC_LINUX_RELEASE 1)
 # Project setup
 set(CMAKE_CXX_STANDARD 17)
 set(QT_VERSION "5.15.9")
+if (DEFINED ENV{DEV_DIR} AND NOT "$ENV{DEV_DIR}" STREQUAL "")
+	set(DEFAULT_DEV_DIR "$ENV{DEV_DIR}")
+else()
+	set(DEFAULT_DEV_DIR "$ENV{HOME}/Dev")
+endif()
+set(DEV_DIR "${DEFAULT_DEV_DIR}" CACHE PATH "Directory containing Qt and dependency source trees")
+if (APPLE AND NOT CMAKE_OSX_ARCHITECTURES)
+	set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "macOS target architecture" FORCE)
+endif()
 if (WIN32)
 	set(CMAKE_CONFIGURATION_TYPES "Debug" "RelWithDebInfo" "Release")
 	if (WINDOWS_32BIT)
@@ -37,7 +46,6 @@ if (WIN32)
 	add_definitions("-DDEBUG_MODE=$<$<CONFIG:Debug>:1>$<$<CONFIG:RelWithDebInfo>:1>$<$<CONFIG:Release>:0>")
 	add_definitions("-DRELEASE_MODE=!DEBUG_MODE")
 
-	set(DEV_DIR $ENV{DEV_DIR})
 	set(EXT_DIR "${CMAKE_SOURCE_DIR}/External/${WIN_EXT_FOLDER}")
 	set(LIBS "${EXT_DIR}/zip.lib" "${EXT_DIR}/zlibstatic.lib" "${EXT_DIR}/OpenAL32.lib" "${EXT_DIR}/libx264.lib") # Zip, OpenAL, x264 (precompiled)
 	set(LIBS ${LIBS} "Mf" "Mfplat" "mfuuid" "strmiids") # FFmpeg dependencies
@@ -55,7 +63,6 @@ if (WIN32)
 
 else()
 
-	set(DEV_DIR "~/Dev")
 	add_definitions("-DOS_UNIX")
 	add_compile_options("-Wall")
 	add_compile_options("-Wno-overloaded-virtual")
@@ -82,6 +89,19 @@ else()
 		message("Mac platform")
 		add_definitions("-DOS_MAC")
 		set(EXT_DIR "${CMAKE_SOURCE_DIR}/External/Mac")
+		execute_process(
+			COMMAND brew --prefix libomp
+			OUTPUT_VARIABLE HOMEBREW_LIBOMP_PREFIX
+			OUTPUT_STRIP_TRAILING_WHITESPACE
+			ERROR_QUIET
+		)
+		if (HOMEBREW_LIBOMP_PREFIX)
+			set(OpenMP_C_FLAGS "-Xpreprocessor -fopenmp -I${HOMEBREW_LIBOMP_PREFIX}/include" CACHE STRING "" FORCE)
+			set(OpenMP_C_LIB_NAMES "omp" CACHE STRING "" FORCE)
+			set(OpenMP_CXX_FLAGS "-Xpreprocessor -fopenmp -I${HOMEBREW_LIBOMP_PREFIX}/include" CACHE STRING "" FORCE)
+			set(OpenMP_CXX_LIB_NAMES "omp" CACHE STRING "" FORCE)
+			set(OpenMP_omp_LIBRARY "${HOMEBREW_LIBOMP_PREFIX}/lib/libomp.dylib" CACHE FILEPATH "" FORCE)
+		endif()
 	
 		# FFmpeg dependencies
 		set(LIBS ${LIBS} "iconv")
@@ -114,9 +134,9 @@ message("DEV_DIR = ${DEV_DIR}")
 message("EXT_DIR = ${EXT_DIR}")
 
 # Add Qt
-set(Qt_DIR "${DEV_DIR}/Qt/${QT_VERSION}/build")
+set(Qt_DIR "${DEV_DIR}/Qt/${QT_VERSION}/build" CACHE PATH "Qt install prefix")
 message("Qt_DIR = ${Qt_DIR}")
-set(CMAKE_PREFIX_PATH ${Qt_DIR})
+list(PREPEND CMAKE_PREFIX_PATH "${Qt_DIR}")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC OFF)
