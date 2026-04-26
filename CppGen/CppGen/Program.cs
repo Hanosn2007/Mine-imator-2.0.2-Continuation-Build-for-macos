@@ -123,7 +123,7 @@ namespace CppGen
 
 				Console.WriteLine("Do you want to copy them over to the GameMaker project? (y/n)");
 				string input = Console.ReadLine();
-				if (input.ToLower().StartsWith("y"))
+				if (input != null && input.ToLower().StartsWith("y"))
 				{
 					foreach (Shader.FileModification mod in Shader.Modifications)
 						File.Copy(mod.Source, mod.Dest, true);
