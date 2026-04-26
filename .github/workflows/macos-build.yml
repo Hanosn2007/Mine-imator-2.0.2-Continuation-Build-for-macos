@@ -51,6 +51,13 @@ jobs:
           curl -L http://www.ffmpeg.org/releases/ffmpeg-5.0.tar.xz -o "$RUNNER_TEMP/ffmpeg.tar.xz"
           tar -xJf "$RUNNER_TEMP/ffmpeg.tar.xz" -C "$DEV_DIR/FFmpeg"
           rm -f "$DEV_DIR/FFmpeg/ffmpeg-5.0/VERSION"
+          cat > "$DEV_DIR/FFmpeg/ffmpeg-5.0/libavutil/avconfig.h" <<'EOF'
+          #ifndef AVUTIL_AVCONFIG_H
+          #define AVUTIL_AVCONFIG_H
+          #define AV_HAVE_BIGENDIAN 0
+          #define AV_HAVE_FAST_UNALIGNED 1
+          #endif
+          EOF
 
           curl -L https://openal-soft.org/openal-releases/openal-soft-1.22.0.tar.bz2 -o "$RUNNER_TEMP/openal.tar.bz2"
           tar -xjf "$RUNNER_TEMP/openal.tar.bz2" -C "$DEV_DIR/OpenAL"
@@ -118,6 +125,13 @@ jobs:
             -skip qtxmlpatterns
           make -j"$(sysctl -n hw.ncpu)"
           make install
+
+      - name: Save Qt cache
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.QT_PREFIX }}
+          key: macos-15-intel-qt-${{ env.QT_VERSION }}-static-x86_64-v2
 
       - name: Generate C++ sources
         run: |
