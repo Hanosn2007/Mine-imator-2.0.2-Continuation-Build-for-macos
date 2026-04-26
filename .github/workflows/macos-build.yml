@@ -157,7 +157,13 @@ jobs:
         run: |
           set -euxo pipefail
           mkdir -p artifact/Mine-imator-macos-x64
+          mkdir -p artifact/Mine-imator-macos-x64/lib
           cp build-mac-x64/Release/Mine-imator artifact/Mine-imator-macos-x64/
+          cp "$(brew --prefix libomp)/lib/libomp.dylib" artifact/Mine-imator-macos-x64/lib/
+          cp "$(brew --prefix libpng)/lib/libpng16.16.dylib" artifact/Mine-imator-macos-x64/lib/
+          install_name_tool -change "$(brew --prefix libomp)/lib/libomp.dylib" "@executable_path/lib/libomp.dylib" artifact/Mine-imator-macos-x64/Mine-imator
+          install_name_tool -change "$(brew --prefix libpng)/lib/libpng16.16.dylib" "@executable_path/lib/libpng16.16.dylib" artifact/Mine-imator-macos-x64/Mine-imator
+          codesign --force --sign - artifact/Mine-imator-macos-x64/Mine-imator
           cp -R GmProject/datafiles/* artifact/Mine-imator-macos-x64/
 
       - name: Upload artifact
