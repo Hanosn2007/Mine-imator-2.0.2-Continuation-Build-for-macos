@@ -455,9 +455,9 @@ namespace CppProject
 	{
 		QVector<IntType> keys = {};
 #if OS_MAC
-		if (event->key() != Qt::Key_Meta)
+		if (event->key() != Qt::Key_Control)
 		{
-			const BoolType commandDown = event->modifiers() & Qt::MetaModifier;
+			const BoolType commandDown = event->modifiers() & Qt::ControlModifier;
 			keyStateMap[vk_control].SetDown(commandDown);
 			keyStateMap[vk_rcontrol].SetDown(commandDown);
 			keyStateMap[vk_lcontrol].SetDown(commandDown);
@@ -467,9 +467,6 @@ namespace CppProject
 		{
 			case Qt::Key_Alt: keys = { vk_alt, vk_ralt, vk_lalt }; break;
 			case Qt::Key_Control: keys = { vk_control, vk_rcontrol, vk_lcontrol }; break;
-#if OS_MAC
-			case Qt::Key_Meta: keys = { vk_control, vk_rcontrol, vk_lcontrol }; break;
-#endif
 			case Qt::Key_Shift: keys = { vk_shift, vk_rshift, vk_lshift }; break;
 			default:
 			{
