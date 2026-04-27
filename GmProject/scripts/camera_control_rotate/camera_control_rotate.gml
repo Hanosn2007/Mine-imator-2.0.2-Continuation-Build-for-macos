@@ -9,7 +9,11 @@ function camera_control_rotate(cam, lockx, locky)
 	mx = -((display_mouse_get_x() - lockx) / 4)
 	my = ((display_mouse_get_y() - locky) / 4)
 	display_mouse_set(lockx, locky)
-	
+	camera_control_rotate_delta(cam, mx, my)
+}
+
+function camera_control_rotate_delta(cam, mx, my)
+{
 	if (!cam)
 	{
 		cam_work_angle_xy += mx

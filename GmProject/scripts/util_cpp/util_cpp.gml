@@ -145,6 +145,30 @@ function window_mouse_get_permission()
 	return true;
 }
 
+/// CppSeparate RealType mouse_wheel_delta()
+function mouse_wheel_delta()
+{
+	return mouse_wheel_down() - mouse_wheel_up()
+}
+
+/// CppSeparate RealType mouse_trackpad_scroll_x()
+function mouse_trackpad_scroll_x()
+{
+	return 0
+}
+
+/// CppSeparate RealType mouse_trackpad_scroll_y()
+function mouse_trackpad_scroll_y()
+{
+	return 0
+}
+
+/// CppSeparate RealType mouse_pinch_delta()
+function mouse_pinch_delta()
+{
+	return 0
+}
+
 /// CppSeparate void window_state_save(IntType)
 /// Saves the window state to the current JSON file.
 function window_state_save(window)

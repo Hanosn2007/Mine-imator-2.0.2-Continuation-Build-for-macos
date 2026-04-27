@@ -9,6 +9,7 @@
 #include <QScreen>
 #include <QStyle>
 #include <QTimer>
+#include <QNativeGestureEvent>
 
 namespace CppProject
 {
@@ -165,6 +166,19 @@ namespace CppProject
 
 	bool AppWindow::event(QEvent* event)
 	{
+#if OS_MAC
+		if (event->type() == QEvent::NativeGesture)
+		{
+			QNativeGestureEvent* gesture = static_cast<QNativeGestureEvent*>(event);
+			if (gesture->gestureType() == Qt::ZoomNativeGesture)
+			{
+				mousePinch += gesture->value();
+				event->accept();
+				return true;
+			}
+		}
+#endif
+
 		if (event->type() == QEvent::WindowDeactivate && !closing)
 		{
 			// Clear keys
@@ -230,6 +244,7 @@ namespace CppProject
 		closing = true;
 		event->accept();
 	}
+}
 
 	ArrType MimeDataToFiles(const QMimeData* mimeData)
 	{
@@ -359,11 +374,23 @@ namespace CppProject
 
 	void AppWindow::wheelEvent(QWheelEvent* event)
 	{
-		if (event->angleDelta().y() < 0)
+		const QPoint pixelDelta = event->pixelDelta();
+		const QPoint angleDelta = event->angleDelta();
+
+		if (!pixelDelta.isNull())
+		{
+			mouseTrackpadScrollX += pixelDelta.x();
+			mouseTrackpadScrollY += pixelDelta.y();
+		}
+		else if (angleDelta.y() != 0)
+			mouseWheelPrecise += -angleDelta.y() / 120.0;
+
+		if (angleDelta.y() < 0 || pixelDelta.y() < 0)
 			mouseWheel = -1;
-		else if (event->angleDelta().y() > 0)
+		else if (angleDelta.y() > 0 || pixelDelta.y() > 0)
 			mouseWheel = 1;
 		else
 			mouseWheel = 0;
+
+		event->accept();
 	}
-}

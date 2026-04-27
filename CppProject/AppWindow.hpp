@@ -58,6 +58,9 @@ namespace CppProject
 
 		QHash<IntType, BoolType> mouseDown;
 		int mouseWheel = 0;
+		RealType mouseWheelPrecise = 0;
+		RealType mouseTrackpadScrollX = 0, mouseTrackpadScrollY = 0;
+		RealType mousePinch = 0;
 		QPoint mousePos, mouseLastPos, mouseLockPos, mouseLockWinPos;
 		BoolType mouseLocked = false, mouseUnlock = true;
 

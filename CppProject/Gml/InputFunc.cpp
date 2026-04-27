@@ -57,4 +57,24 @@ namespace CppProject
 	{
 		return (AppWin->mouseWheel > 0);
 	}
-}
+
+	RealType mouse_wheel_delta()
+	{
+		return AppWin->mouseWheelPrecise;
+	}
+
+	RealType mouse_trackpad_scroll_x()
+	{
+		return AppWin->mouseTrackpadScrollX;
+	}
+
+	RealType mouse_trackpad_scroll_y()
+	{
+		return AppWin->mouseTrackpadScrollY;
+	}
+
+	RealType mouse_pinch_delta()
+	{
+		return AppWin->mousePinch;
+	}
+	}

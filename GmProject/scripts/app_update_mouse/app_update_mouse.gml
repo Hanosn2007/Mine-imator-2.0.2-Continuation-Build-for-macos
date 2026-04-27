@@ -20,6 +20,10 @@ function app_update_mouse()
 	mouse_middle_pressed = (!mouse_middle && mouse_check_button(mb_middle))
 	mouse_middle = mouse_check_button(mb_middle)
 	mouse_wheel = mouse_wheel_down() - mouse_wheel_up()
+	mouse_wheel_smooth = mouse_wheel_delta()
+	mouse_trackpad_x = mouse_trackpad_scroll_x()
+	mouse_trackpad_y = mouse_trackpad_scroll_y()
+	mouse_pinch = mouse_pinch_delta()
 	
 	if (mouse_left_pressed)
 	{

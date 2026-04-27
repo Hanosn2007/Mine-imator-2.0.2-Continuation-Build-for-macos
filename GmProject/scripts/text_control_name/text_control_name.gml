@@ -21,9 +21,9 @@ function text_control_name(keybind)
 		case vk_alt:			char = text_get("keyalt"); break;
 		case vk_lalt:			char = text_get("keyleftalt"); break;
 		case vk_ralt:			char = text_get("keyrightalt"); break;
-		case vk_control:		char = text_get("keycontrol"); break;
-		case vk_lcontrol:		char = text_get("keyleftcontrol"); break;
-		case vk_rcontrol:		char = text_get("keyrightcontrol"); break;
+		case vk_control:		char = (platform_get() = e_platform.MAC_OS ? text_get("keycommand") : text_get("keycontrol")); break;
+		case vk_lcontrol:		char = (platform_get() = e_platform.MAC_OS ? text_get("keyleftcommand") : text_get("keyleftcontrol")); break;
+		case vk_rcontrol:		char = (platform_get() = e_platform.MAC_OS ? text_get("keyrightcommand") : text_get("keyrightcontrol")); break;
 		case vk_backspace:		char = text_get("keybackspace"); break;
 		case vk_tab:			char = text_get("keytab"); break;
 		case vk_home:			char = text_get("keyhome"); break;
@@ -101,7 +101,7 @@ function text_control_name(keybind)
 		text = text_get("keyalt") + (text != "" ? (" + " + text) : "")
 	
 	if (keybind[e_keybind_key.CTRL])
-		text = text_get("keycontrol") + (text != "" ? (" + " + text) : "")
+		text = (platform_get() = e_platform.MAC_OS ? text_get("keycommand") : text_get("keycontrol")) + (text != "" ? (" + " + text) : "")
 	
 	if (keybind[e_keybind_key.SHIFT])
 		text = text_get("keyshift") + (text != "" ? (" + " + text) : "")

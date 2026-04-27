@@ -362,6 +362,9 @@ namespace CppProject
 				GFX->surface->EndUse();
 
 			win->mouseWheel = 0;
+			win->mouseWheelPrecise = 0;
+			win->mouseTrackpadScrollX = win->mouseTrackpadScrollY = 0;
+			win->mousePinch = 0;
 			win->mouseLastPos = win->mousePos;
 			if (win->mouseUnlock)
 				win->mouseLocked = win->mouseUnlock = false;
@@ -455,6 +458,9 @@ namespace CppProject
 		{
 			case Qt::Key_Alt: keys = { vk_alt, vk_ralt, vk_lalt }; break;
 			case Qt::Key_Control: keys = { vk_control, vk_rcontrol, vk_lcontrol }; break;
+#if OS_MAC
+			case Qt::Key_Meta: keys = { vk_control, vk_rcontrol, vk_lcontrol }; break;
+#endif
 			case Qt::Key_Shift: keys = { vk_shift, vk_rshift, vk_lshift }; break;
 			default:
 			{
