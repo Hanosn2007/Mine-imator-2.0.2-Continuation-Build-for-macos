@@ -244,8 +244,6 @@ namespace CppProject
 		closing = true;
 		event->accept();
 	}
-}
-
 	ArrType MimeDataToFiles(const QMimeData* mimeData)
 	{
 		ArrType files;
@@ -394,3 +392,4 @@ namespace CppProject
 
 		event->accept();
 	}
+}
