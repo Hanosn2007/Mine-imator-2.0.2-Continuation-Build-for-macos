@@ -454,6 +454,15 @@ namespace CppProject
 	void AppHandler::SetKeyDown(QKeyEvent* event, BoolType down)
 	{
 		QVector<IntType> keys = {};
+#if OS_MAC
+		if (event->key() != Qt::Key_Meta)
+		{
+			const BoolType commandDown = event->modifiers() & Qt::MetaModifier;
+			keyStateMap[vk_control].SetDown(commandDown);
+			keyStateMap[vk_rcontrol].SetDown(commandDown);
+			keyStateMap[vk_lcontrol].SetDown(commandDown);
+		}
+#endif
 		switch (event->key())
 		{
 			case Qt::Key_Alt: keys = { vk_alt, vk_ralt, vk_lalt }; break;
@@ -466,6 +475,10 @@ namespace CppProject
 			{
 				if (keyMap.contains(event->key())) // Mapped key
 					keys = { keyMap.value(event->key()) };
+#if OS_MAC
+				else if (event->key() > 0 && event->key() < 256)
+					keys = { event->key() };
+#endif
 				else
 					keys = { event->nativeVirtualKey() };
 				break;
