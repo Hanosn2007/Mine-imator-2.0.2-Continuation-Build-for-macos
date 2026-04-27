@@ -4,7 +4,7 @@
 function text_control_name(keybind)
 {
 	var char, text;
-	
+
 	switch (keybind[e_keybind_key.CHAR])
 	{
 		case vk_left:			char = text_get("keyleft"); break;
@@ -28,7 +28,7 @@ function text_control_name(keybind)
 		case vk_tab:			char = text_get("keytab"); break;
 		case vk_home:			char = text_get("keyhome"); break;
 		case vk_end:			char = text_get("keyend"); break;
-		case vk_delete:			char = text_get("keydelete"); break;
+		case vk_delete:			char = (platform_get() = e_platform.MAC_OS ? text_get("keybackspace") : text_get("keydelete")); break;
 		case vk_insert:			char = text_get("keyinsert"); break;
 		case vk_pageup:			char = text_get("keypageup"); break;
 		case vk_pagedown:		char = text_get("keypagedown"); break;
@@ -61,7 +61,7 @@ function text_control_name(keybind)
 		case vk_add:			char = text_get("keynumpadkey", "+"); break;
 		case vk_subtract:		char = text_get("keynumpadkey", "-"); break;
 		case vk_decimal:		char = text_get("keynumpadkey", "."); break;
-		
+
 		case 12:				char = text_get("keynumpadkey", "5"); break; // numpad 5 without numpad lock enabled
 		case 20:				char = text_get("keycapslock"); break;
 		case 91:				char = ((platform_get() = e_platform.WINDOWS) ? text_get("keyleftwindows") : ((platform_get() = e_platform.MAC_OS) ? text_get("keyleftcommand") : text_get("keyleftsuper"))); break;
@@ -88,23 +88,23 @@ function text_control_name(keybind)
 		case 220:				char = "\\"; break;
 		case 221:				char = "]"; break;
 		case 222:				char = "'"; break;
-		
+
 		case vk_nokey:
 		case vk_anykey:
 		case null:				char = ""; break;
 		default:				char = chr(keybind[e_keybind_key.CHAR]); break;
 	}
-	
+
 	text = char
-	
+
 	if (keybind[e_keybind_key.ALT])
 		text = text_get("keyalt") + (text != "" ? (" + " + text) : "")
-	
+
 	if (keybind[e_keybind_key.CTRL])
 		text = (platform_get() = e_platform.MAC_OS ? text_get("keycommand") : text_get("keycontrol")) + (text != "" ? (" + " + text) : "")
-	
+
 	if (keybind[e_keybind_key.SHIFT])
 		text = text_get("keyshift") + (text != "" ? (" + " + text) : "")
-	
+
 	return text
 }
